@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -36,7 +37,7 @@ func main() {
 
 	}
 	fmt.Println(count)
-
+	readLinesRegex("2_input.txt")
 }
 
 func readLines(path string) ([][]string, error) {
@@ -51,6 +52,28 @@ func readLines(path string) ([][]string, error) {
 	for scanner.Scan() {
 		str := scanner.Text()
 		lines = append(lines, strings.Split(str, ":"))
+
+	}
+	return lines, scanner.Err()
+}
+
+func readLinesRegex(path string) ([][]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	//1-3 g: nvgxtllpcgcgnmdqgg
+	re1, err := regexp.Compile(`([0-9]+)-([0-9]+) ([a-z]): ([a-z]+)`)
+
+	var lines [][]string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		str := scanner.Text()
+		regexMatch := re1.FindStringSubmatch(str)
+		lines = append(lines, regexMatch)
+		fmt.Println(regexMatch[1:])
 
 	}
 	return lines, scanner.Err()
