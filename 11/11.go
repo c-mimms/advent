@@ -20,19 +20,24 @@ func main() {
 	changes := true
 
 	for changes {
+		// for z := 0; z < 2; z++ {
 		lines2 = make([]string, 0)
 		changes = false
 
 		for i, line := range lines {
 			var cloneline string
 			for j, char := range line {
-				//Count adjacentsies
-				count := countAdjacent(i, j, lines)
-				// fmt.Println(count)
+				//Count adjacentsies (star 1)
+				// count := countAdjacent(i, j, lines)
+
+				//Count visible (Star 2)
+				count := countVisible(j, i, lines)
+				// fmt.Println(j, ",", i, " has ", count)
+
 				if char == 'L' && count == 0 {
 					cloneline = cloneline + string('#')
 					changes = true
-				} else if char == '#' && count > 4 { //Added 1 to count to account for the character itself
+				} else if char == '#' && count > 4 { //Added 1 to count to account for the character itself (Add 1 for star 2)
 					cloneline = cloneline + string('L')
 					changes = true
 				} else {
@@ -45,30 +50,47 @@ func main() {
 		fmt.Println(" ")
 		lines = lines2
 	}
-
 	fmt.Println(countOccupied(lines))
+	fmt.Println(changes)
+}
 
-	// oneDifference := 1
-	// threeDifference := 1
-	// for i, line := range lines[1:] {
-	// 	if line-lines[i] == 1 {
-	// 		oneDifference++
-	// 	} else if line-lines[i] == 3 {
-	// 		threeDifference++
-	// 	}
-	// }
-	// fmt.Println(oneDifference * threeDifference)
+func countVisible(startX int, startY int, lines []string) int {
+	visibleOccupiedSeats := 0
+	for _, xChange := range []int{-1, 0, 1} {
+		for _, yChange := range []int{-1, 0, 1} {
+			if xChange == 0 && yChange == 0 {
+				continue
+			}
+			x := startX + xChange
+			y := startY + yChange
+			for inBounds(x, y, lines) {
+				if lines[y][x] == 'L' {
+					// fmt.Println("saw empty seat in direction ", xChange, yChange, "from", startX, startY)
+					break
+				} else if lines[y][x] == '#' {
+					// fmt.Println("saw full seat in direction ", xChange, yChange, "from", startX, startY)
+					visibleOccupiedSeats++
+					break
+				}
+				x += xChange
+				y += yChange
+			}
+		}
+	}
+	return visibleOccupiedSeats
+}
 
-	//Star 2
-
-	//
-
+//Returns true if x and y are within the array bounds
+func inBounds(x int, y int, lines []string) bool {
+	if y >= 0 && y < len(lines) && x >= 0 && x < len(lines[0]) {
+		return true
+	}
+	return false
 }
 
 func countAdjacent(i int, j int, lines []string) int {
 	count := 0
 	for _, line2 := range lines[max(i-1, 0):min(i+2, len(lines))] {
-		// fmt.Println(line2[max(j-1, 0):min(j+2, len(line2))])
 		for _, char2 := range line2[max(j-1, 0):min(j+2, len(line2))] {
 			if char2 == '#' {
 				count++
